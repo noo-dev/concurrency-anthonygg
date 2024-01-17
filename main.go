@@ -10,7 +10,7 @@ func main() {
 	now := time.Now()
 
 	userID := 10
-	respCh := make(chan string)
+	respCh := make(chan string, 128)
 
 	wg := &sync.WaitGroup{}
 
