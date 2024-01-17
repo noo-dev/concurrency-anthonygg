@@ -9,31 +9,33 @@ func main() {
 	now := time.Now()
 
 	userID := 10
-	userData := go fetchUserData(userID)
-	userRecs := go fetchUserRecommendations(userID)
-	userLikes := go fetchUserLikes(userID)
+	respCh := make(chan string)
 
-	fmt.Println(userData)
-	fmt.Println(userRecs)
-	fmt.Println(userLikes)
+	go fetchUserData(userID, respCh)
+	go fetchUserRecommendations(userID, respCh)
+	go fetchUserLikes(userID, respCh)
+
+	for resp := range respCh {
+		fmt.Println(resp)
+	}
 
 	fmt.Println("ELAPSED TIME", time.Since(now))
 }
 
-func fetchUserData(userID int) string {
+func fetchUserData(userID int, respCh chan string) {
 	time.Sleep(80 * time.Millisecond)
 
-	return "user data"
+	respCh <- "user data"
 }
 
-func fetchUserRecommendations(userID int) string {
+func fetchUserRecommendations(userID int, respCh chan string) {
 	time.Sleep(120 * time.Millisecond)
 
-	return "user recommendations"
+	respCh <- "user recommendations"
 }
 
-func fetchUserLikes(userID int) string {
+func fetchUserLikes(userID int, respCh chan string) {
 	time.Sleep(50 * time.Millisecond)
 
-	return "user likes"
+	respCh <- "user likes"
 }
