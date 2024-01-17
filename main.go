@@ -15,6 +15,8 @@ func main() {
 	go fetchUserRecommendations(userID, respCh)
 	go fetchUserLikes(userID, respCh)
 
+	close(respCh)
+	
 	for resp := range respCh {
 		fmt.Println(resp)
 	}
