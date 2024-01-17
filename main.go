@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Message struct {
 	From     string
@@ -13,14 +16,16 @@ type Server struct {
 
 func (s *Server) StartAndListen() {
 	for {
-		msg := <-s.msgCh
-		fmt.Printf("received message from: %s payload %s\n", msg.From, msg.Payloads)
+		select {
+		case msg := <-s.msgCh:
+			fmt.Printf("received message from: %s payload %s\n", msg.From, msg.Payloads)
+		}
 	}
 }
 
-func sendMessageToServer(msgCh chan Message, paylaod string) {
+func sendMessageToServer(msgCh chan Message, from string, paylaod string) {
 	msg := Message{
-		From:     "john doe",
+		From:     from,
 		Payloads: paylaod,
 	}
 
@@ -34,5 +39,11 @@ func main() {
 	}
 	go s.StartAndListen()
 
-	sendMessageToServer(s.msgCh, "Hello gophers")
+	for i := 0; i < 10; i++ {
+		go func() {
+			time.Sleep(time.Second)
+			sendMessageToServer(s.msgCh, "John Doe", "Hello gophers")
+		}()
+	}
+
 }
