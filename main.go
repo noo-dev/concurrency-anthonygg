@@ -1,59 +1,38 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-	"time"
-)
+import "fmt"
 
-func main() {
-	now := time.Now()
+type Message struct {
+	From     string
+	Payloads string
+}
 
-	userID := 10
-	respCh := make(chan string, 128)
+type Server struct {
+	msgCh chan Message
+}
 
-	wg := &sync.WaitGroup{}
+func (s *Server) StartAndListen() {
+	for {
+		msg := <-s.msgCh
+		fmt.Printf("received message from: %s payload %s\n", msg.From, msg.Payloads)
+	}
+}
 
-	wg.Add(1)
-	go fetchUserData(userID, respCh, wg)
-
-	wg.Add(1)
-	go fetchUserRecommendations(userID, respCh, wg)
-
-	wg.Add(1)
-	go fetchUserLikes(userID, respCh, wg)
-
-	wg.Wait()
-
-	close(respCh)
-
-	for resp := range respCh {
-		fmt.Println(resp)
+func sendMessageToServer(msgCh chan Message, paylaod string) {
+	msg := Message{
+		From:     "john doe",
+		Payloads: paylaod,
 	}
 
-	fmt.Println("ELAPSED TIME", time.Since(now))
+	msgCh <- msg
+	fmt.Println("sending message")
 }
 
-func fetchUserData(userID int, respCh chan string, wg *sync.WaitGroup) {
-	time.Sleep(80 * time.Millisecond)
+func main() {
+	s := &Server{
+		msgCh: make(chan Message),
+	}
+	go s.StartAndListen()
 
-	respCh <- "user data"
-
-	wg.Done()
-}
-
-func fetchUserRecommendations(userID int, respCh chan string, wg *sync.WaitGroup) {
-	time.Sleep(120 * time.Millisecond)
-
-	respCh <- "user recommendations"
-
-	wg.Done()
-}
-
-func fetchUserLikes(userID int, respCh chan string, wg *sync.WaitGroup) {
-	time.Sleep(50 * time.Millisecond)
-
-	respCh <- "user likes"
-
-	wg.Done()
+	sendMessageToServer(s.msgCh, "Hello gophers")
 }
