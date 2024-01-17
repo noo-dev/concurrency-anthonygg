@@ -19,6 +19,8 @@ func (s *Server) StartAndListen() {
 		select {
 		case msg := <-s.msgCh:
 			fmt.Printf("received message from: %s payload %s\n", msg.From, msg.Payloads)
+		default:
+
 		}
 	}
 }
@@ -41,9 +43,11 @@ func main() {
 
 	for i := 0; i < 10; i++ {
 		go func() {
-			time.Sleep(time.Second)
+			time.Sleep(2 * time.Second)
 			sendMessageToServer(s.msgCh, "John Doe", "Hello gophers")
 		}()
 	}
+
+	select {}
 
 }
